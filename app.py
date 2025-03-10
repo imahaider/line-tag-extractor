@@ -5,7 +5,7 @@ import re
 from io import BytesIO
 
 # Streamlit app title
-st.title("PDF Line Tag Extractor")
+st.title("PDF Line Tag Extractor by MAH")
 
 # File uploader
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
