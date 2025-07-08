@@ -23,8 +23,6 @@ if uploaded_files:
         for page in pdf:
             text = page.get_text("text")
             if text:
-                # Debug: Display raw text
-                st.write(f"Raw text from {uploaded_file.name}, page {page.number + 1}:", text[:500])
                 # Clean text: remove extra spaces, normalize hyphens
                 text = re.sub(r'\s*\n\s*', ' ', text).replace('–', '-').replace('—', '-')
                 tags = re.findall(tag_pattern, text)
