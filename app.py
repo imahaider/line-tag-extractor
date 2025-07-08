@@ -11,7 +11,7 @@ st.title("PDF Line Tag Extractor - MAH")
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
 
 # Regex for line tags
-tag_pattern = r'(?:\d+(?:[ -]?\d+/\d+)?|\d+/\d+)"-[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+'
+tag_pattern = r'(?:\d+(?:[ -]?\d+/\d+)?)"-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-VA)?'
 
 if uploaded_files:
     all_tags = []
