@@ -59,7 +59,9 @@ st.caption("Developed by Muhammad Ali Haider")
 with st.sidebar:
     st.header("About")
     st.write("Upload one or more PDFs. The app extracts line-tags with preview and export.")
+    st.markdown("---")
     st.subheader("Settings")
+    st.markdown("---")
     st.subheader("Export")
     export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
     st.markdown("---")
@@ -67,7 +69,7 @@ with st.sidebar:
     sort_output = st.toggle("Sort Results Alphabetically", value=True)
     show_duplicates = st.toggle("Keep Duplicates", value=False)
     prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 1/2 or 3"" or 1-1/2")
-    st.markdown("---")
+    
     
 
     # ---------- Regex Pattern (password protected at the very end)
