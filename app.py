@@ -19,11 +19,15 @@ st.markdown("""
   -webkit-background-clip: text; background-clip: text; color: transparent;
   margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
 }
-/* green XLSX button */
-.dl-xlsx button, .dl-xlsx [data-testid="baseButton-secondary"]{
-  background:#16a34a !important; color:#fff !important; border-color:#16a34a !important;
+/* green XLSX download button */
+div[data-testid="stDownloadButton"][key="xlsx_dl"] button {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+    border: none !important;
 }
-.dl-xlsx button:hover, .dl-xlsx [data-testid="baseButton-secondary"]:hover{ filter:brightness(.95); }
+div[data-testid="stDownloadButton"][key="xlsx_dl"] button:hover {
+    background-color: #15803d !important;
+}
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 </style>
 """, unsafe_allow_html=True)
@@ -49,8 +53,6 @@ with st.sidebar:
     sort_output = st.toggle("Sort results alphabetically", value=True)
     show_duplicates = st.toggle("Keep duplicates", value=False)
     prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 12-34/5 or 100")
-
-    
 
     # >>> Regex Pattern moved to the very end <<<
     st.markdown("---")
@@ -99,21 +101,19 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete — {len(all_tags)} tag(s) found.")
 
-        # Downloads (XLSX is green)
+        # Downloads (XLSX button styled green)
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            st.markdown('<div class="dl-xlsx">', unsafe_allow_html=True)
             st.download_button(
                 "Download XLSX",
                 out,
                 "line_number_tags.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
-                key="xlsx_dl"
+                key="xlsx_dl"  # <- key is used by CSS selector
             )
-            st.markdown('</div>', unsafe_allow_html=True)
         elif export_fmt == "CSV":
             csv = df.to_csv(index=False).encode("utf-8")
             st.download_button("Download CSV", csv, "line_number_tags.csv", "text/csv", use_container_width=True)
