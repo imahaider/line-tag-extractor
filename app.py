@@ -8,9 +8,19 @@ import base64
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- CSS: layout, title, and button styles
+# ---------- CSS: layout, exact colors, identical button styling
 st.markdown("""
 <style>
+:root{
+  --orange:#FD602E;           /* RGB(253,96,46) */
+  --green:#6EB819;            /* RGB(110,184,25) */
+  --btn-pad-y:0.75rem;
+  --btn-pad-x:1.25rem;
+  --btn-radius:12px;
+  --btn-font-size:1rem;
+  --btn-font-weight:700;
+}
+
 /* Layout and title */
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
 .block-container > *:first-child { margin-top: 0 !important; }
@@ -22,39 +32,46 @@ st.markdown("""
 }
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 
-/* Uniform button spec (same size/shape for Extract + Downloads) */
-.btn-solid {
+/* Uniform button spec for BOTH Extract and Downloads */
+.btn-solid{
   display: inline-block;
   width: 100%;
   text-align: center;
-  padding: 0.75rem 1.25rem;
-  font-weight: 700;
-  font-size: 1rem;
-  border-radius: 12px;
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--btn-font-size);
+  border-radius: var(--btn-radius);
   border: 1px solid transparent;
   text-decoration: none;
   cursor: pointer;
+  transition: filter .15s ease;
+  user-select: none;
 }
 
-/* Color variants per your exact RGB/HEX */
-.btn-orange { background-color: #FD602E; border-color: #FD602E; color: #fff; }
-.btn-orange:hover { background-color: #e65529; border-color: #e65529; }
+/* Color variants */
+.btn-orange{ background-color: var(--orange); border-color: var(--orange); color: #fff; }
+.btn-orange:hover{ filter: brightness(.95); }
 
-.btn-green { background-color: #6EB819; border-color: #6EB819; color: #fff; }
-.btn-green:hover { background-color: #5ea114; border-color: #5ea114; }
+.btn-green{ background-color: var(--green); border-color: var(--green); color: #fff; }
+.btn-green:hover{ filter: brightness(.95); }
 
-/* Force the native Streamlit Extract button to your orange spec */
-#extract_btn_wrap button {
+/* Force the native Streamlit Extract button to use the exact same spec as .btn-solid and orange color */
+#extract_btn_wrap button{
   width: 100%;
-  background-color: #FD602E !important;  /* RGB(253,96,46) */
-  border-color: #FD602E !important;
+  background-color: var(--orange) !important;
+  border-color: var(--orange) !important;
   color: #fff !important;
-  padding: 0.75rem 1.25rem !important;
-  font-weight: 700 !important;
-  font-size: 1rem !important;
-  border-radius: 12px !important;
+  padding: var(--btn-pad-y) var(--btn-pad-x) !important;
+  font-weight: var(--btn-font-weight) !important;
+  font-size: var(--btn-font-size) !important;
+  border-radius: var(--btn-radius) !important;
 }
-#extract_btn_wrap button:hover { filter: brightness(0.95); }
+#extract_btn_wrap button:hover{ filter: brightness(.95); }
+
+/* Focus accessibility for anchors */
+a.btn-solid:focus-visible{
+  outline: 3px solid rgba(14,165,233,.5); outline-offset: 2px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -87,7 +104,7 @@ with st.sidebar:
 # ---------- Main controls
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
 
-# Wrap extract button so we can style it reliably to #FD602E
+# Wrap Extract button so we can style it to exact #FD602E and match size/shape
 st.markdown('<div id="extract_btn_wrap">', unsafe_allow_html=True)
 run = st.button("Extract Tags", use_container_width=True, type="primary")
 st.markdown('</div>', unsafe_allow_html=True)
@@ -95,10 +112,11 @@ st.markdown('</div>', unsafe_allow_html=True)
 results_placeholder = st.empty()
 all_tags = []
 
-# Helper to create same-sized download "buttons" (styled anchors) in #6EB819
-def download_anchor(data_bytes: bytes, filename: str, label: str, variant_class: str, mime: str) -> None:
+# Helper to render download buttons as styled anchors with identical spec
+def download_button_like_streamlit(data_bytes: bytes, filename: str, label: str, variant_class: str, mime: str) -> None:
     b64 = base64.b64encode(data_bytes).decode()
     href = f"data:{mime};base64,{b64}"
+    # Same width, padding, radius, weight, font-size as Extract button via .btn-solid
     st.markdown(f'<a class="btn-solid {variant_class}" href="{href}" download="{filename}">{label}</a>', unsafe_allow_html=True)
 
 if uploaded_files and run:
@@ -135,12 +153,12 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # ---------- Downloads (all same size/shape as Extract, green #6EB819) ----------
+        # ---------- Downloads: same size/shape/design as Extract, green #6EB819 ----------
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            download_anchor(
+            download_button_like_streamlit(
                 data_bytes=out.getvalue(),
                 filename="line_number_tags.xlsx",
                 label="⬇ Download XLSX",
@@ -149,7 +167,7 @@ if uploaded_files and run:
             )
         elif export_fmt == "CSV":
             csv_bytes = df.to_csv(index=False).encode("utf-8")
-            download_anchor(
+            download_button_like_streamlit(
                 data_bytes=csv_bytes,
                 filename="line_number_tags.csv",
                 label="⬇ Download CSV",
@@ -158,7 +176,7 @@ if uploaded_files and run:
             )
         else:
             txt_bytes = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            download_anchor(
+            download_button_like_streamlit(
                 data_bytes=txt_bytes,
                 filename="line_number_tags.txt",
                 label="⬇ Download TXT",
