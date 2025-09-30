@@ -61,7 +61,7 @@ with st.sidebar:
     st.write("Upload one or more PDFs. The app extracts line-tags with preview and export.")
     st.markdown("---")
     st.subheader("Export")
-    export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
+    export_fmt = st.segmented_control("File Format", ["XLSX", "CSV", "TXT"], default="XLSX")
     st.markdown("---")
     case_sensitive = st.toggle("Case Sensitive", value=False)
     sort_output = st.toggle("Sort Results Alphabetically", value=True)
