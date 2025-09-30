@@ -76,7 +76,7 @@ with st.sidebar:
     # NEW contains filter (optional)
     contains_filter = st.text_input(
         "Find tags containing (optional)",
-        placeholder="e.g., LT-10, PROD, SS, 300"
+        placeholder="e.g., LC-456 or 1370X or -V"
     )
 
     # ---------- Regex Pattern (password protected at the very end)
