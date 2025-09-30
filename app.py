@@ -7,7 +7,7 @@ from io import BytesIO
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- Styling
+# ---------- Styling (buttons + title fix)
 st.markdown("""
 <style>
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
@@ -20,29 +20,28 @@ st.markdown("""
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 
 /* --- Extract Tags button (orange) --- */
-button[kind="primary"] {
+div[data-testid="stButton"] > button[kind="primary"] {
     background-color: #FD602E !important;
-    color: white !important;
-    font-weight: 600;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    width: 100%;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.2rem !important;
+    font-size: 1rem !important;
 }
 
-/* --- Download buttons (green, same look) --- */
-div.download-btn button {
+/* --- Download buttons (green, same size as Extract) --- */
+.download-btn button {
     background-color: #6EB819 !important;
-    color: white !important;
-    font-weight: 600;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    width: 100%;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.2rem !important;
+    font-size: 1rem !important;
+    width: 100% !important;   /* makes same width as extract button */
 }
-div.download-btn button:hover {
+.download-btn button:hover {
     filter: brightness(0.95);
 }
 </style>
@@ -115,40 +114,37 @@ if uploaded_files and run:
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download XLSX",
-                out,
-                "line_number_tags.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key="xlsx_btn"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container():
+                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
+                st.download_button(
+                    "Download XLSX",
+                    out,
+                    "line_number_tags.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="xlsx_dl"
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
 
         elif export_fmt == "CSV":
             csv = df.to_csv(index=False).encode("utf-8")
-            st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download CSV",
-                csv,
-                "line_number_tags.csv",
-                mime="text/csv",
-                key="csv_btn"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container():
+                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
+                st.download_button(
+                    "Download CSV", csv, "line_number_tags.csv", "text/csv",
+                    use_container_width=True, key="csv_dl"
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
 
         else:
             txt = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download TXT",
-                txt,
-                "line_number_tags.txt",
-                mime="text/plain",
-                key="txt_btn"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-
+            with st.container():
+                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
+                st.download_button(
+                    "Download TXT", txt, "line_number_tags.txt", "text/plain",
+                    use_container_width=True, key="txt_dl"
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
