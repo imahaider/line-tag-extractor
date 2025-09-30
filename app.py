@@ -19,7 +19,7 @@ st.markdown("""
 }
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 
-/* --- Extract Tags button (orange) --- */
+/* Extract Tags button (orange, unchanged) */
 div[data-testid="stButton"] > button[kind="primary"] {
     background-color: #FD602E !important;
     color: #ffffff !important;
@@ -28,10 +28,11 @@ div[data-testid="stButton"] > button[kind="primary"] {
     font-weight: 600 !important;
     padding: 0.6rem 1.2rem !important;
     font-size: 1rem !important;
+    width: 100% !important;
 }
 
-/* --- Download buttons (green, same size as Extract) --- */
-.download-btn button {
+/* Download buttons (green #6EB819) */
+div[data-testid="stDownloadButton"] > button {
     background-color: #6EB819 !important;
     color: #ffffff !important;
     border-radius: 8px !important;
@@ -39,9 +40,9 @@ div[data-testid="stButton"] > button[kind="primary"] {
     font-weight: 600 !important;
     padding: 0.6rem 1.2rem !important;
     font-size: 1rem !important;
-    width: 100% !important;   /* makes same width as extract button */
+    width: 100% !important;
 }
-.download-btn button:hover {
+div[data-testid="stDownloadButton"] > button:hover {
     filter: brightness(0.95);
 }
 </style>
