@@ -15,7 +15,7 @@ st.markdown("""
 <style>
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
 .app-title{
-  font-weight: 800; font-size: 2.4rem; line-height: 1.2;
+  font-weight: 800; font-size: 2.7rem; line-height: 1.2;
   background: linear-gradient(90deg,#0ea5e9,#22c55e,#a855f7);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
