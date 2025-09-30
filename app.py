@@ -66,7 +66,7 @@ with st.sidebar:
     case_sensitive = st.toggle("Case Sensitive", value=False)
     sort_output = st.toggle("Sort Results Alphabetically", value=True)
     show_duplicates = st.toggle("Keep Duplicates", value=False)
-    prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 1/2 or 3"" or 1-1/2")
+    prefix_filter = st.text_input("Line-Tag starts with (optional)", placeholder="e.g., 1/2 or 3"" or 1-1/2")
     
     
 
@@ -100,7 +100,7 @@ with st.sidebar:
 
 # ---------- Main area
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
-run = st.button("Extract tags", use_container_width=True, type="primary")
+run = st.button("Extract Line-Tags", use_container_width=True, type="primary")
 
 results_placeholder = st.empty()
 all_tags = []
