@@ -5,7 +5,7 @@ import re
 from io import BytesIO
 
 # ---------- Configurable password for regex editor
-REGEX_PASSWORD = st.secrets.get("REGEX_PASSWORD", "haider123")
+REGEX_PASSWORD = st.secrets.get("REGEX_PASSWORD", "haider2410")
 
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
