@@ -4,6 +4,9 @@ import pandas as pd
 import re
 from io import BytesIO
 
+# ---------- Configurable password for regex editor
+REGEX_PASSWORD = st.secrets.get("REGEX_PASSWORD", "haider123")
+
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
@@ -65,9 +68,36 @@ with st.sidebar:
     prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 12-34/5 or 100")
 
     st.markdown("---")
+    st.subheader("About")
+    st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
+
+    # ---------- Regex Pattern (password protected at the very end)
+    st.markdown("---")
     st.subheader("Regex Pattern")
-    default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
-    tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
+
+    # Session flag to persist unlock state
+    if "regex_unlocked" not in st.session_state:
+        st.session_state.regex_unlocked = False
+
+    if not st.session_state.regex_unlocked:
+        pw = st.text_input("Enter password to unlock", type="password", key="regex_pw")
+        unlock = st.button("Unlock regex editor", key="unlock_btn", use_container_width=True)
+        if unlock:
+            if pw == REGEX_PASSWORD:
+                st.session_state.regex_unlocked = True
+                st.success("Regex editor unlocked")
+            else:
+                st.error("Incorrect password")
+        # Show placeholder when locked
+        default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
+        tag_pattern = default_pattern  # used later if still locked
+    else:
+        # Optional re-lock for safety
+        relock = st.button("Lock regex editor", key="lock_btn", use_container_width=True)
+        if relock:
+            st.session_state.regex_unlocked = False
+        default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
+        tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
 # ---------- Main area
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
@@ -110,42 +140,31 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete — {len(all_tags)} tag(s) found.")
 
-        # --- Download buttons styled green ---
+        # --- Download buttons (already styled green via CSS)
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            with st.container():
-                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-                st.download_button(
-                    "Download XLSX",
-                    out,
-                    "line_number_tags.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    key="xlsx_dl"
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
-
+            st.download_button(
+                "Download XLSX",
+                out,
+                "line_number_tags.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                key="xlsx_dl"
+            )
         elif export_fmt == "CSV":
             csv = df.to_csv(index=False).encode("utf-8")
-            with st.container():
-                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-                st.download_button(
-                    "Download CSV", csv, "line_number_tags.csv", "text/csv",
-                    use_container_width=True, key="csv_dl"
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
-
+            st.download_button(
+                "Download CSV", csv, "line_number_tags.csv", "text/csv",
+                use_container_width=True, key="csv_dl"
+            )
         else:
             txt = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            with st.container():
-                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-                st.download_button(
-                    "Download TXT", txt, "line_number_tags.txt", "text/plain",
-                    use_container_width=True, key="txt_dl"
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.download_button(
+                "Download TXT", txt, "line_number_tags.txt", "text/plain",
+                use_container_width=True, key="txt_dl"
+            )
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
