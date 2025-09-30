@@ -22,7 +22,7 @@ st.markdown("""
 }
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 
-/* Uniform primary button spec (size, radius, font) */
+/* Uniform button spec (same size/shape for Extract + Downloads) */
 .btn-solid {
   display: inline-block;
   width: 100%;
@@ -36,23 +36,17 @@ st.markdown("""
   cursor: pointer;
 }
 
-/* Color variants */
+/* Color variants per your exact RGB/HEX */
 .btn-orange { background-color: #FD602E; border-color: #FD602E; color: #fff; }
 .btn-orange:hover { background-color: #e65529; border-color: #e65529; }
 
 .btn-green { background-color: #6EB819; border-color: #6EB819; color: #fff; }
 .btn-green:hover { background-color: #5ea114; border-color: #5ea114; }
 
-.btn-blue { background-color: #0ea5e9; border-color: #0ea5e9; color: #fff; }
-.btn-blue:hover { background-color: #0c8cc5; border-color: #0c8cc5; }
-
-.btn-grey { background-color: #64748b; border-color: #64748b; color: #fff; }
-.btn-grey:hover { background-color: #566376; border-color: #566376; }
-
-/* Style ONLY the Extract button by scoping to wrapper id */
+/* Force the native Streamlit Extract button to your orange spec */
 #extract_btn_wrap button {
   width: 100%;
-  background-color: #FD602E !important;
+  background-color: #FD602E !important;  /* RGB(253,96,46) */
   border-color: #FD602E !important;
   color: #fff !important;
   padding: 0.75rem 1.25rem !important;
@@ -60,9 +54,7 @@ st.markdown("""
   font-size: 1rem !important;
   border-radius: 12px !important;
 }
-#extract_btn_wrap button:hover {
-  filter: brightness(0.95);
-}
+#extract_btn_wrap button:hover { filter: brightness(0.95); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -95,7 +87,7 @@ with st.sidebar:
 # ---------- Main controls
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
 
-# Wrap extract button so we can style it reliably
+# Wrap extract button so we can style it reliably to #FD602E
 st.markdown('<div id="extract_btn_wrap">', unsafe_allow_html=True)
 run = st.button("Extract Tags", use_container_width=True, type="primary")
 st.markdown('</div>', unsafe_allow_html=True)
@@ -103,7 +95,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 results_placeholder = st.empty()
 all_tags = []
 
-# ---------- Helper to make same-sized download buttons
+# Helper to create same-sized download "buttons" (styled anchors) in #6EB819
 def download_anchor(data_bytes: bytes, filename: str, label: str, variant_class: str, mime: str) -> None:
     b64 = base64.b64encode(data_bytes).decode()
     href = f"data:{mime};base64,{b64}"
@@ -143,7 +135,7 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # ---------- Downloads with uniform size/shape ----------
+        # ---------- Downloads (all same size/shape as Extract, green #6EB819) ----------
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
@@ -152,7 +144,7 @@ if uploaded_files and run:
                 data_bytes=out.getvalue(),
                 filename="line_number_tags.xlsx",
                 label="⬇ Download XLSX",
-                variant_class="btn-green",  # #6EB819
+                variant_class="btn-green",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
         elif export_fmt == "CSV":
@@ -161,7 +153,7 @@ if uploaded_files and run:
                 data_bytes=csv_bytes,
                 filename="line_number_tags.csv",
                 label="⬇ Download CSV",
-                variant_class="btn-green",  # keep same look as XLSX; change to btn-blue if you want blue
+                variant_class="btn-green",
                 mime="text/csv",
             )
         else:
@@ -170,7 +162,7 @@ if uploaded_files and run:
                 data_bytes=txt_bytes,
                 filename="line_number_tags.txt",
                 label="⬇ Download TXT",
-                variant_class="btn-green",  # keep same look as XLSX; change to btn-grey if you want grey
+                variant_class="btn-green",
                 mime="text/plain",
             )
     else:
