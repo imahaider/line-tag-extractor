@@ -5,124 +5,91 @@ import re
 from io import BytesIO
 import base64
 
-# ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- CSS: layout, exact colors, identical button styling
+# ---------- CSS ----------
 st.markdown("""
 <style>
-:root{
-  --orange:#FD602E;           /* RGB(253,96,46) */
-  --green:#6EB819;            /* RGB(110,184,25) */
-  --btn-pad-y:0.75rem;
-  --btn-pad-x:1.25rem;
-  --btn-radius:12px;
-  --btn-font-size:1rem;
-  --btn-font-weight:700;
-}
-
-/* Layout and title */
+/* Title + footer */
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
-.block-container > *:first-child { margin-top: 0 !important; }
 .app-title{
   font-weight: 800; font-size: 2.1rem; line-height: 1.2;
   background: linear-gradient(90deg,#0ea5e9,#22c55e,#a855f7);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
+  margin: 0 0 .45rem 0;
 }
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
 
-/* Uniform button spec for BOTH Extract and Downloads */
-.btn-solid{
+/* Uniform button design */
+.btn-solid {
   display: inline-block;
   width: 100%;
   text-align: center;
-  padding: var(--btn-pad-y) var(--btn-pad-x);
-  font-weight: var(--btn-font-weight);
-  font-size: var(--btn-font-size);
-  border-radius: var(--btn-radius);
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 12px;
   border: 1px solid transparent;
   text-decoration: none;
   cursor: pointer;
-  transition: filter .15s ease;
-  user-select: none;
 }
 
-/* Color variants */
-.btn-orange{ background-color: var(--orange); border-color: var(--orange); color: #fff; }
-.btn-orange:hover{ filter: brightness(.95); }
+/* Colors */
+.btn-orange { background-color: #FD602E; border-color: #FD602E; color: #fff; }
+.btn-orange:hover { background-color: #e65529; border-color: #e65529; }
 
-.btn-green{ background-color: var(--green); border-color: var(--green); color: #fff; }
-.btn-green:hover{ filter: brightness(.95); }
+.btn-green { background-color: #6EB819; border-color: #6EB819; color: #fff; }
+.btn-green:hover { background-color: #5ea114; border-color: #5ea114; }
 
-/* Force the native Streamlit Extract button to use the exact same spec as .btn-solid and orange color */
-#extract_btn_wrap button{
+/* Style native Extract button */
+#extract_btn_wrap button {
   width: 100%;
-  background-color: var(--orange) !important;
-  border-color: var(--orange) !important;
+  background-color: #FD602E !important;
+  border-color: #FD602E !important;
   color: #fff !important;
-  padding: var(--btn-pad-y) var(--btn-pad-x) !important;
-  font-weight: var(--btn-font-weight) !important;
-  font-size: var(--btn-font-size) !important;
-  border-radius: var(--btn-radius) !important;
+  padding: 0.75rem 1.25rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  border-radius: 12px !important;
 }
-#extract_btn_wrap button:hover{ filter: brightness(.95); }
-
-/* Focus accessibility for anchors */
-a.btn-solid:focus-visible{
-  outline: 3px solid rgba(14,165,233,.5); outline-offset: 2px;
-}
+#extract_btn_wrap button:hover { filter: brightness(0.95); }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Header
+# ---------- Header ----------
 st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
 st.caption("Developed by Muhammad Ali Haider")
 
-# ---------- Sidebar
+# ---------- Sidebar ----------
 with st.sidebar:
-    st.header("About")
-    st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
-    st.markdown("---")
-
-    st.subheader("Settings")
-
-    st.subheader("Export")
-    export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
-
-    st.markdown("---")
+    export_fmt = st.segmented_control("Export Format", ["XLSX", "CSV", "TXT"], default="XLSX")
     case_sensitive = st.toggle("Case sensitive regex", value=False)
     sort_output = st.toggle("Sort results alphabetically", value=True)
     show_duplicates = st.toggle("Keep duplicates", value=False)
-    prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 12-34/5 or 100")
-
-    st.markdown("---")
+    prefix_filter = st.text_input("Starts with (optional)")
     st.subheader("Regex Pattern (optional)")
     default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
     tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
-# ---------- Main controls
+# ---------- Main ----------
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
 
-# Wrap Extract button so we can style it to exact #FD602E and match size/shape
 st.markdown('<div id="extract_btn_wrap">', unsafe_allow_html=True)
-run = st.button("Extract Tags", use_container_width=True, type="primary")
+run = st.button("Extract Tags", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 results_placeholder = st.empty()
-all_tags = []
 
-# Helper to render download buttons as styled anchors with identical spec
-def download_button_like_streamlit(data_bytes: bytes, filename: str, label: str, variant_class: str, mime: str) -> None:
+def download_anchor(data_bytes, filename, label, mime):
+    """Uniform green button for downloads"""
     b64 = base64.b64encode(data_bytes).decode()
     href = f"data:{mime};base64,{b64}"
-    # Same width, padding, radius, weight, font-size as Extract button via .btn-solid
-    st.markdown(f'<a class="btn-solid {variant_class}" href="{href}" download="{filename}">{label}</a>', unsafe_allow_html=True)
+    st.markdown(f'<a class="btn-solid btn-green" href="{href}" download="{filename}">{label}</a>', unsafe_allow_html=True)
 
 if uploaded_files and run:
     flags = 0 if case_sensitive else re.IGNORECASE
     rx = re.compile(tag_pattern, flags=flags)
-
+    all_tags = []
     for uploaded_file in uploaded_files:
         data = uploaded_file.getvalue()
         pdf = fitz.open(stream=data, filetype="pdf")
@@ -130,63 +97,34 @@ if uploaded_files and run:
             text = page.get_text("text")
             if text:
                 text = re.sub(r'\s*\n\s*', ' ', text).replace('–', '-').replace('—', '-')
-                matches = rx.findall(text)
-                all_tags.extend(matches)
+                all_tags.extend(rx.findall(text))
         pdf.close()
 
     if prefix_filter:
         all_tags = [t for t in all_tags if str(t).startswith(prefix_filter)]
-
     if not show_duplicates:
-        seen, deduped = set(), []
-        for t in all_tags:
-            if t not in seen:
-                seen.add(t)
-                deduped.append(t)
-        all_tags = deduped
-
+        all_tags = list(dict.fromkeys(all_tags))  # dedupe preserve order
     if sort_output:
         all_tags = sorted(all_tags, key=lambda x: str(x).lower())
 
     if all_tags:
         df = pd.DataFrame(all_tags, columns=["Line Number Tags"])
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
-        st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # ---------- Downloads: same size/shape/design as Extract, green #6EB819 ----------
         if export_fmt == "XLSX":
-            out = BytesIO()
-            df.to_excel(out, index=False)
-            out.seek(0)
-            download_button_like_streamlit(
-                data_bytes=out.getvalue(),
-                filename="line_number_tags.xlsx",
-                label="⬇ Download XLSX",
-                variant_class="btn-green",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+            out = BytesIO(); df.to_excel(out, index=False); out.seek(0)
+            download_anchor(out.getvalue(), "line_number_tags.xlsx", "⬇ Download XLSX",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         elif export_fmt == "CSV":
-            csv_bytes = df.to_csv(index=False).encode("utf-8")
-            download_button_like_streamlit(
-                data_bytes=csv_bytes,
-                filename="line_number_tags.csv",
-                label="⬇ Download CSV",
-                variant_class="btn-green",
-                mime="text/csv",
-            )
+            csv_bytes = df.to_csv(index=False).encode()
+            download_anchor(csv_bytes, "line_number_tags.csv", "⬇ Download CSV", "text/csv")
         else:
-            txt_bytes = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            download_button_like_streamlit(
-                data_bytes=txt_bytes,
-                filename="line_number_tags.txt",
-                label="⬇ Download TXT",
-                variant_class="btn-green",
-                mime="text/plain",
-            )
+            txt_bytes = "\n".join(df["Line Number Tags"]).encode()
+            download_anchor(txt_bytes, "line_number_tags.txt", "⬇ Download TXT", "text/plain")
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
-    results_placeholder.info("Upload PDFs and click Extract tags to see results here.")
+    results_placeholder.info("Upload PDFs and click Extract Tags to see results here.")
 
-# ---------- Footer
+# ---------- Footer ----------
 st.markdown('<div class="footer">© 2025 Muhammad Ali Haider. All rights reserved.</div>', unsafe_allow_html=True)
