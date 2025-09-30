@@ -54,7 +54,7 @@ with st.sidebar:
 
     # >>> Regex Pattern moved to the very end <<<
     st.markdown("---")
-    st.subheader("Regex Pattern")
+    st.subheader("Regex Pattern (optional)")
     default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
     tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
