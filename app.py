@@ -66,15 +66,23 @@ with st.sidebar:
     case_sensitive = st.toggle("Case Sensitive", value=False)
     sort_output = st.toggle("Sort Results Alphabetically", value=True)
     show_duplicates = st.toggle("Keep Duplicates", value=False)
-    prefix_filter = st.text_input("Line-Tag starts with (optional)", placeholder="e.g., 1/2 or 3"" or 1-1/2")
-    
-    
+
+    # Starts-with filter (existing)
+    prefix_filter = st.text_input(
+        "Line-Tag starts with (optional)",
+        placeholder="e.g., 1/2, 3\", or 1-1/2"
+    )
+
+    # NEW contains filter (optional)
+    contains_filter = st.text_input(
+        "Find tags containing (optional)",
+        placeholder="e.g., LT-10, PROD, SS, 300"
+    )
 
     # ---------- Regex Pattern (password protected at the very end)
     st.markdown("---")
     st.subheader("Line-Tag General Pattern")
 
-    # Session flag to persist unlock state
     if "regex_unlocked" not in st.session_state:
         st.session_state.regex_unlocked = False
 
@@ -87,11 +95,9 @@ with st.sidebar:
                 st.success("Regex editor unlocked")
             else:
                 st.error("Incorrect password")
-        # Show placeholder when locked
         default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
-        tag_pattern = default_pattern  # used later if still locked
+        tag_pattern = default_pattern
     else:
-        # Optional re-lock for safety
         relock = st.button("Lock regex editor", key="lock_btn", use_container_width=True)
         if relock:
             st.session_state.regex_unlocked = False
@@ -120,8 +126,15 @@ if uploaded_files and run:
                 all_tags.extend(matches)
         pdf.close()
 
+    # Apply startswith filter (if provided)
     if prefix_filter:
-        all_tags = [t for t in all_tags if str(t).startswith(prefix_filter)]
+        all_tags = [t for t in all_tags if (t.startswith(prefix_filter) if case_sensitive
+                    else t.lower().startswith(prefix_filter.lower()))]
+
+    # Apply contains filter (if provided)
+    if contains_filter:
+        all_tags = [t for t in all_tags if (contains_filter in t if case_sensitive
+                    else contains_filter.lower() in t.lower())]
 
     if not show_duplicates:
         seen, deduped = set(), []
