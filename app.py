@@ -38,7 +38,7 @@ with st.sidebar:
     st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
    st.markdown("---")
     # Export first
-    st.header("Settings")
+    st.subheader("Settings")
 
     st.subheader("Export")
     export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
