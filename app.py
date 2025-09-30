@@ -10,16 +10,7 @@ st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", lay
 # ---------- Styling (buttons + title fix)
 st.markdown("""
 <style>
-.block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
-.app-title{
-  font-weight: 800; font-size: 2.1rem; line-height: 1.2;
-  background: linear-gradient(90deg,#0ea5e9,#22c55e,#a855f7);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
-}
-.footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
-
-/* --- Extract Tags button (orange) --- */
+/* Extract Tags button (orange, unchanged) */
 div[data-testid="stButton"] > button[kind="primary"] {
     background-color: #FD602E !important;
     color: #ffffff !important;
@@ -31,8 +22,8 @@ div[data-testid="stButton"] > button[kind="primary"] {
     width: 100% !important;
 }
 
-/* --- Download buttons (green #6EB819, same shape/size as Extract) --- */
-.download-btn button {
+/* Download buttons (green #6EB819) */
+div[data-testid="stDownloadButton"] > button {
     background-color: #6EB819 !important;
     color: #ffffff !important;
     border-radius: 8px !important;
@@ -42,11 +33,12 @@ div[data-testid="stButton"] > button[kind="primary"] {
     font-size: 1rem !important;
     width: 100% !important;
 }
-.download-btn button:hover {
+div[data-testid="stDownloadButton"] > button:hover {
     filter: brightness(0.95);
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ---------- Header
 st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
