@@ -36,7 +36,7 @@ st.caption("Developed by Muhammad Ali Haider")
 with st.sidebar:
     st.header("About")
     st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
-   st.markdown("---")
+    st.markdown("---")
     # Export first
     st.subheader("Settings")
 
