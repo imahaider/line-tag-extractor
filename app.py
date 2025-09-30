@@ -57,30 +57,29 @@ st.caption("Developed by Muhammad Ali Haider")
 
 # ---------- Sidebar
 with st.sidebar:
-    st.header("Settings")
+    st.header("About")
+    st.write("Upload one or more PDFs. The app extracts line-tags with preview and export.")
+    st.subheader("Settings")
     st.subheader("Export")
     export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
-
     st.markdown("---")
-    case_sensitive = st.toggle("Case sensitive regex", value=False)
-    sort_output = st.toggle("Sort results alphabetically", value=True)
-    show_duplicates = st.toggle("Keep duplicates", value=False)
-    prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 12-34/5 or 100")
-
+    case_sensitive = st.toggle("Case Sensitive", value=False)
+    sort_output = st.toggle("Sort Results Alphabetically", value=True)
+    show_duplicates = st.toggle("Keep Duplicates", value=False)
+    prefix_filter = st.text_input("Starts with (optional)", placeholder="e.g., 1/2 or 3"" or 1-1/2")
     st.markdown("---")
-    st.subheader("About")
-    st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
+    
 
     # ---------- Regex Pattern (password protected at the very end)
     st.markdown("---")
-    st.subheader("Regex Pattern")
+    st.subheader("Line-Tag General Pattern")
 
     # Session flag to persist unlock state
     if "regex_unlocked" not in st.session_state:
         st.session_state.regex_unlocked = False
 
     if not st.session_state.regex_unlocked:
-        pw = st.text_input("Enter password to unlock", type="password", key="regex_pw")
+        pw = st.text_input("Enter password to set-up", type="password", key="regex_pw")
         unlock = st.button("Unlock regex editor", key="unlock_btn", use_container_width=True)
         if unlock:
             if pw == REGEX_PASSWORD:
