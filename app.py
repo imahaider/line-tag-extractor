@@ -5,7 +5,7 @@ import re
 from io import BytesIO
 
 # Streamlit app title
-st.title("PDF Line Tag Extractor")
+st.title("P&IDs Line-Tags Extractor")
 st.caption("Developed by Muhammad Ali Haider")
 
 # File uploader
