@@ -63,7 +63,7 @@ with st.sidebar:
     st.subheader("Export")
     export_fmt = st.segmented_control("File Format", ["XLSX", "CSV", "TXT"], default="XLSX")
     st.markdown("---")
-    st.subheader("Setting")
+    st.subheader("Settings")
     case_sensitive = st.toggle("Case Sensitive", value=False)
     sort_output = st.toggle("Sort Results Alphabetically", value=True)
     show_duplicates = st.toggle("Keep Duplicates", value=False)
