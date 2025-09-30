@@ -8,9 +8,10 @@ import base64
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- Styling (title + footer + button styles)
+# ---------- CSS: layout, title, and button styles
 st.markdown("""
 <style>
+/* Layout and title */
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
 .block-container > *:first-child { margin-top: 0 !important; }
 .app-title{
@@ -19,18 +20,49 @@ st.markdown("""
   -webkit-background-clip: text; background-clip: text; color: transparent;
   margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
 }
-.btn-green {
-  display: inline-block;
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  text-decoration: none;
-  background: #16a34a;
-  color: #ffffff;
-  border: 1px solid #16a34a;
-}
-.btn-green:hover { background: #15803d; border-color: #15803d; }
 .footer{color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;}
+
+/* Uniform primary button spec (size, radius, font) */
+.btn-solid {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Color variants */
+.btn-orange { background-color: #FD602E; border-color: #FD602E; color: #fff; }
+.btn-orange:hover { background-color: #e65529; border-color: #e65529; }
+
+.btn-green { background-color: #6EB819; border-color: #6EB819; color: #fff; }
+.btn-green:hover { background-color: #5ea114; border-color: #5ea114; }
+
+.btn-blue { background-color: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+.btn-blue:hover { background-color: #0c8cc5; border-color: #0c8cc5; }
+
+.btn-grey { background-color: #64748b; border-color: #64748b; color: #fff; }
+.btn-grey:hover { background-color: #566376; border-color: #566376; }
+
+/* Style ONLY the Extract button by scoping to wrapper id */
+#extract_btn_wrap button {
+  width: 100%;
+  background-color: #FD602E !important;
+  border-color: #FD602E !important;
+  color: #fff !important;
+  padding: 0.75rem 1.25rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  border-radius: 12px !important;
+}
+#extract_btn_wrap button:hover {
+  filter: brightness(0.95);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,12 +92,22 @@ with st.sidebar:
     default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
     tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
-# ---------- Main area
+# ---------- Main controls
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
-run = st.button("Extract tags", use_container_width=True, type="primary")
+
+# Wrap extract button so we can style it reliably
+st.markdown('<div id="extract_btn_wrap">', unsafe_allow_html=True)
+run = st.button("Extract Tags", use_container_width=True, type="primary")
+st.markdown('</div>', unsafe_allow_html=True)
 
 results_placeholder = st.empty()
 all_tags = []
+
+# ---------- Helper to make same-sized download buttons
+def download_anchor(data_bytes: bytes, filename: str, label: str, variant_class: str, mime: str) -> None:
+    b64 = base64.b64encode(data_bytes).decode()
+    href = f"data:{mime};base64,{b64}"
+    st.markdown(f'<a class="btn-solid {variant_class}" href="{href}" download="{filename}">{label}</a>', unsafe_allow_html=True)
 
 if uploaded_files and run:
     flags = 0 if case_sensitive else re.IGNORECASE
@@ -99,31 +141,38 @@ if uploaded_files and run:
     if all_tags:
         df = pd.DataFrame(all_tags, columns=["Line Number Tags"])
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
-        st.success(f"Extraction complete — {len(all_tags)} tag(s) found.")
+        st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # ---------- Downloads ----------
+        # ---------- Downloads with uniform size/shape ----------
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-
-            # Convert to base64 for custom button
-            b64 = base64.b64encode(out.getvalue()).decode()
-            href = f'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}'
-
-            # Custom green download button
-            st.markdown(
-                f'<a class="btn-green" href="{href}" download="line_number_tags.xlsx">⬇ Download XLSX</a>',
-                unsafe_allow_html=True
+            download_anchor(
+                data_bytes=out.getvalue(),
+                filename="line_number_tags.xlsx",
+                label="⬇ Download XLSX",
+                variant_class="btn-green",  # #6EB819
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-
         elif export_fmt == "CSV":
-            csv = df.to_csv(index=False).encode("utf-8")
-            st.download_button("Download CSV", csv, "line_number_tags.csv", "text/csv", use_container_width=True)
+            csv_bytes = df.to_csv(index=False).encode("utf-8")
+            download_anchor(
+                data_bytes=csv_bytes,
+                filename="line_number_tags.csv",
+                label="⬇ Download CSV",
+                variant_class="btn-green",  # keep same look as XLSX; change to btn-blue if you want blue
+                mime="text/csv",
+            )
         else:
-            txt = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            st.download_button("Download TXT", txt, "line_number_tags.txt", "text/plain", use_container_width=True)
-
+            txt_bytes = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
+            download_anchor(
+                data_bytes=txt_bytes,
+                filename="line_number_tags.txt",
+                label="⬇ Download TXT",
+                variant_class="btn-green",  # keep same look as XLSX; change to btn-grey if you want grey
+                mime="text/plain",
+            )
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
