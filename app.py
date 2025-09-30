@@ -34,12 +34,12 @@ st.caption("Developed by Muhammad Ali Haider")
 
 # ---------- Sidebar
 with st.sidebar:
-    st.header("Settings")
-  
-    st.markdown("---")
-    st.subheader("About")
+    st.header("About")
     st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
+   st.markdown("---")
     # Export first
+    st.header("Settings")
+
     st.subheader("Export")
     export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
 
