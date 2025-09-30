@@ -6,7 +6,7 @@ from io import BytesIO
 
 # Streamlit app title
 st.title("PDF Line Tag Extractor")
-st.markdown("#### Developed by *Muhammad Ali Haider*")
+st.caption("Developed by Muhammad Ali Haider")
 
 # File uploader
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
