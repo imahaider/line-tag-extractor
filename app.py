@@ -7,7 +7,7 @@ from io import BytesIO
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- Styling (buttons + title fix)
+# ---------- Styling
 st.markdown("""
 <style>
 .block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
@@ -30,9 +30,8 @@ div[data-testid="stButton"] > button[kind="primary"] {
     font-size: 1rem !important;
 }
 
-/* --- Download buttons (green, same look) --- */
-.download-btn button, 
-.download-btn [data-testid="baseButton-secondary"] {
+/* --- Download buttons (green) --- */
+div.download-btn > button {
     background-color: #6EB819 !important;
     color: #ffffff !important;
     border-radius: 8px !important;
@@ -40,8 +39,9 @@ div[data-testid="stButton"] > button[kind="primary"] {
     font-weight: 600 !important;
     padding: 0.6rem 1.2rem !important;
     font-size: 1rem !important;
+    width: 100% !important;   /* match full-width style */
 }
-.download-btn button:hover {
+div.download-btn > button:hover {
     filter: brightness(0.95);
 }
 </style>
@@ -114,30 +114,30 @@ if uploaded_files and run:
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download XLSX",
-                out,
-                "line_number_tags.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                key="xlsx_dl"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container():
+                st.markdown('<div class="download-btn">', unsafe_allow_html=True)
+                st.download_button(
+                    "Download XLSX",
+                    out,
+                    "line_number_tags.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="xlsx_dl"
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
+
         elif export_fmt == "CSV":
             csv = df.to_csv(index=False).encode("utf-8")
             st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download CSV", csv, "line_number_tags.csv", "text/csv", use_container_width=True, key="csv_dl"
-            )
+            st.download_button("Download CSV", csv, "line_number_tags.csv", "text/csv", use_container_width=True, key="csv_dl")
             st.markdown('</div>', unsafe_allow_html=True)
+
         else:
             txt = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
             st.markdown('<div class="download-btn">', unsafe_allow_html=True)
-            st.download_button(
-                "Download TXT", txt, "line_number_tags.txt", "text/plain", use_container_width=True, key="txt_dl"
-            )
+            st.download_button("Download TXT", txt, "line_number_tags.txt", "text/plain", use_container_width=True, key="txt_dl")
             st.markdown('</div>', unsafe_allow_html=True)
+
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
