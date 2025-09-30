@@ -80,7 +80,7 @@ with st.sidebar:
 
     if not st.session_state.regex_unlocked:
         pw = st.text_input("Enter password to set-up", type="password", key="regex_pw")
-        unlock = st.button("Unlock regex editor", key="unlock_btn", use_container_width=True)
+        unlock = st.button("Unlock Editor", key="unlock_btn", use_container_width=True)
         if unlock:
             if pw == REGEX_PASSWORD:
                 st.session_state.regex_unlocked = True
