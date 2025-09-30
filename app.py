@@ -8,10 +8,24 @@ import base64
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- CSS: only buttons styled
+# ---------- CSS: title + footer + custom buttons
 st.markdown("""
 <style>
-/* Keep your existing layout/title/footer intact; only buttons below */
+.block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
+.block-container > *:first-child { margin-top: 0 !important; }
+
+.app-title {
+  font-weight: 800; font-size: 2.1rem; line-height: 1.2;
+  background: linear-gradient(90deg,#0ea5e9,#22c55e,#a855f7);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
+}
+
+.footer {
+  color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;
+}
+
+/* Shared style for Extract + Download buttons */
 .btn-solid {
   display: inline-block;
   width: 100%;
@@ -25,13 +39,9 @@ st.markdown("""
   cursor: pointer;
 }
 
-/* Download buttons: green #6EB819 */
-.btn-green { background-color: #6EB819; border-color: #6EB819; color: #fff; }
-.btn-green:hover { background-color: #5ea114; border-color: #5ea114; }
-
-/* Extract Tags (form submit) stable selector */
-div[data-testid="formSubmitButton"] > button {
-  background-color: #FD602E !important;  /* orange */
+/* Extract button (orange #FD602E) */
+#extract_btn_wrap button {
+  background-color: #FD602E !important;
   border-color: #FD602E !important;
   color: #fff !important;
   width: 100%;
@@ -40,15 +50,26 @@ div[data-testid="formSubmitButton"] > button {
   font-size: 1rem !important;
   border-radius: 12px !important;
 }
-div[data-testid="formSubmitButton"] > button:hover { filter: brightness(0.95); }
+#extract_btn_wrap button:hover { filter: brightness(0.95); }
+
+/* Download buttons (green #6EB819) */
+.btn-green {
+  background-color: #6EB819;
+  border-color: #6EB819;
+  color: #fff;
+}
+.btn-green:hover {
+  background-color: #5ea114;
+  border-color: #5ea114;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Header (unchanged)
+# ---------- Header
 st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
 st.caption("Developed by Muhammad Ali Haider")
 
-# ---------- Sidebar (unchanged)
+# ---------- Sidebar
 with st.sidebar:
     st.header("About")
     st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
@@ -70,21 +91,27 @@ with st.sidebar:
     default_pattern = r'(?:\d+(?:\s*-\s*\d+/\d+)?)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
     tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
-# ---------- Main controls (Extract via form submit for reliable styling)
+# ---------- Main controls
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
-with st.form("extract_form", clear_on_submit=False):
-    run = st.form_submit_button("Extract Tags", use_container_width=True)
+
+# Extract button styled orange
+st.markdown('<div id="extract_btn_wrap">', unsafe_allow_html=True)
+run = st.button("Extract Tags", use_container_width=True, type="primary")
+st.markdown('</div>', unsafe_allow_html=True)
 
 results_placeholder = st.empty()
 all_tags = []
 
-# Helper to create same-sized download buttons in green #6EB819
-def download_button_like_primary(data_bytes: bytes, filename: str, label: str, mime: str) -> None:
+# Helper to create styled download buttons (green)
+def download_anchor(data_bytes: bytes, filename: str, label: str, mime: str) -> None:
     b64 = base64.b64encode(data_bytes).decode()
     href = f"data:{mime};base64,{b64}"
-    st.markdown(f'<a class="btn-solid btn-green" href="{href}" download="{filename}">{label}</a>', unsafe_allow_html=True)
+    st.markdown(
+        f'<a class="btn-solid btn-green" href="{href}" download="{filename}">{label}</a>',
+        unsafe_allow_html=True
+    )
 
-# ---------- Processing (unchanged)
+# ---------- Processing
 if uploaded_files and run:
     flags = 0 if case_sensitive else re.IGNORECASE
     rx = re.compile(tag_pattern, flags=flags)
@@ -119,37 +146,23 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # ---------- Downloads: same size/shape as Extract, green #6EB819 ----------
+        # Downloads (all same style, green #6EB819)
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
             out.seek(0)
-            download_button_like_primary(
-                data_bytes=out.getvalue(),
-                filename="line_number_tags.xlsx",
-                label="⬇ Download XLSX",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+            download_anchor(out.getvalue(), "line_number_tags.xlsx", "⬇ Download XLSX",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         elif export_fmt == "CSV":
             csv_bytes = df.to_csv(index=False).encode("utf-8")
-            download_button_like_primary(
-                data_bytes=csv_bytes,
-                filename="line_number_tags.csv",
-                label="⬇ Download CSV",
-                mime="text/csv",
-            )
+            download_anchor(csv_bytes, "line_number_tags.csv", "⬇ Download CSV", "text/csv")
         else:
             txt_bytes = "\n".join(df["Line Number Tags"].astype(str).tolist()).encode("utf-8")
-            download_button_like_primary(
-                data_bytes=txt_bytes,
-                filename="line_number_tags.txt",
-                label="⬇ Download TXT",
-                mime="text/plain",
-            )
+            download_anchor(txt_bytes, "line_number_tags.txt", "⬇ Download TXT", "text/plain")
     else:
         results_placeholder.info("No tags found in the uploaded PDFs.")
 else:
     results_placeholder.info("Upload PDFs and click Extract tags to see results here.")
 
-# ---------- Footer (unchanged)
+# ---------- Footer
 st.markdown('<div class="footer">© 2025 Muhammad Ali Haider. All rights reserved.</div>', unsafe_allow_html=True)
