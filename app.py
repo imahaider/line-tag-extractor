@@ -8,23 +8,9 @@ import base64
 # ---------- Page setup
 st.set_page_config(page_title="P&IDs Line-Tags Extractor", page_icon="📄", layout="wide")
 
-# ---------- CSS: title + footer + custom buttons
+# ---------- CSS: only button styling
 st.markdown("""
 <style>
-.block-container {padding-top: 2.5rem; padding-bottom: 3rem; max-width: 1200px;}
-.block-container > *:first-child { margin-top: 0 !important; }
-
-.app-title {
-  font-weight: 800; font-size: 2.1rem; line-height: 1.2;
-  background: linear-gradient(90deg,#0ea5e9,#22c55e,#a855f7);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  margin: 0 0 .45rem 0; word-break: break-word; overflow-wrap: anywhere;
-}
-
-.footer {
-  color:rgba(49,51,63,.55); font-size:.85rem; text-align:center; margin-top:2rem;
-}
-
 /* Shared style for Extract + Download buttons */
 .btn-solid {
   display: inline-block;
@@ -39,9 +25,9 @@ st.markdown("""
   cursor: pointer;
 }
 
-/* Extract button (orange #FD602E) */
+/* Extract Tags button (orange #FD602E) */
 #extract_btn_wrap button {
-  background-color: #FD602E !important;
+  background-color: #FD602E !important;  /* RGB(253,96,46) */
   border-color: #FD602E !important;
   color: #fff !important;
   width: 100%;
@@ -66,17 +52,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------- Header
-st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
+st.title("P&IDs Line-Tags Extractor")
 st.caption("Developed by Muhammad Ali Haider")
 
 # ---------- Sidebar
 with st.sidebar:
-    st.header("About")
-    st.write("Upload one or more PDFs. The app extracts line-tags using a regex, with preview and export.")
-    st.markdown("---")
-
-    st.subheader("Settings")
-
     st.subheader("Export")
     export_fmt = st.segmented_control("Format", ["XLSX", "CSV", "TXT"], default="XLSX")
 
@@ -146,7 +126,7 @@ if uploaded_files and run:
         results_placeholder.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"Extraction complete. {len(all_tags)} tag(s) found.")
 
-        # Downloads (all same style, green #6EB819)
+        # Downloads (all styled green)
         if export_fmt == "XLSX":
             out = BytesIO()
             df.to_excel(out, index=False)
