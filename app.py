@@ -96,13 +96,13 @@ with st.sidebar:
                 st.success("Regex editor unlocked")
             else:
                 st.error("Incorrect password")
-        default_pattern = r'^(?:1\s+1/2|1-1/2|3/4|1/2|0\.75|0\.5|\d+)\s*"\s*-(?:[A-Za-z0-9]+-){3,4}[A-Za-z0-9]+$'
+        default_pattern = r'(?:\d+(?:[ -]\d+/\d+)?|\d*\.\d+|\d+/\d+)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{2,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
         tag_pattern = default_pattern
     else:
         relock = st.button("Lock regex editor", key="lock_btn", use_container_width=True)
         if relock:
             st.session_state.regex_unlocked = False
-        default_pattern = r'^(?:1\s+1/2|1-1/2|3/4|1/2|0\.75|0\.5|\d+)\s*"\s*-(?:[A-Za-z0-9]+-){3,4}[A-Za-z0-9]+$'
+        default_pattern = r'(?:\d+(?:[ -]\d+/\d+)?|\d*\.\d+|\d+/\d+)\s*"\s*-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{2,}-[A-Za-z0-9]+(?:-[A-Za-z]+)?'
         tag_pattern = st.text_area("Line-tag regex", value=default_pattern, height=90)
 
 # ---------- Main area
