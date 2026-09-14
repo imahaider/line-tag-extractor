@@ -53,7 +53,7 @@ div[data-testid="stDownloadButton"] > button:hover {
 
 # ---------- Header
 st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
-st.caption("Developed by Muhammad Ali Haider")
+st.caption(" ")
 
 # ---------- Sidebar
 with st.sidebar:
@@ -184,4 +184,4 @@ else:
     results_placeholder.info("Upload PDFs and click Extract tags to see results here.")
 
 # ---------- Footer
-st.markdown('<div class="footer">© 2025 Muhammad Ali Haider. All rights reserved.</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">© 2025 MAH. All rights reserved.</div>', unsafe_allow_html=True)
