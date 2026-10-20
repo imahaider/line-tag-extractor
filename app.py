@@ -53,7 +53,7 @@ div[data-testid="stDownloadButton"] > button:hover {
 
 # ---------- Header
 st.markdown('<div class="app-title">P&IDs Line-Tags Extractor</div>', unsafe_allow_html=True)
-st.caption(" ")
+st.caption(" Developed by Muhammad Ali Haider")
 
 # ---------- Sidebar
 with st.sidebar:
