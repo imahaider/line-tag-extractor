@@ -184,4 +184,4 @@ else:
     results_placeholder.info("Upload PDFs and click Extract tags to see results here.")
 
 # ---------- Footer
-st.markdown('<div class="footer">© 2025 MAH. All rights reserved.</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">© 2025 Developed by Muhammad Ali Haider. All rights reserved.</div>', unsafe_allow_html=True)
